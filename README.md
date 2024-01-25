@@ -25,9 +25,9 @@ as_command .pets_hideinfo - 0/1 Suppress info chat from plugin. (default: 0)
 2) Put the following in `svencoop\default_plugins.txt`:
 
 ```
-	"plugin"
- 	{
-  	"name" "Pet Followers"
-   	"script" "pets"
-  }
+    "plugin"
+    {
+        "name" "Pet Followers"
+        "script" "pets"
+    }
 ```
