@@ -20,6 +20,14 @@ as_command .pets_hideinfo - 0/1 Suppress info chat from plugin. (default: 0)
 
 <BR>  
 
+
+# Console Commands  
+Admins only  
+
+.pets_reload - For reloading pets.txt when editing existing pet entries (to test animations and set bone controllers without having to restart the map)  
+Dont' use this when adding or removing pets, only for editing existing entries in pets.txt  
+Restart the map when adding or removing pets  
+
 # INSTALLATION  
 1) Put pets.as and pets.txt in `svencoop_addon\scripts\plugins\`
 2) Put the following in `svencoop\default_plugins.txt`:
