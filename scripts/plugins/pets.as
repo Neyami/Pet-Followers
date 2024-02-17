@@ -1,10 +1,11 @@
 // Based on GHW Pet Followers by GHW_Chronic
-#include "../ChatCommandManager"
+#include "../ChatCommandManager" //By the svencoop team, should come with the game (svencoop\scripts\)
 
 void PluginInit()
 {
 	g_Module.ScriptInfo.SetAuthor( "Nero" );
 	g_Module.ScriptInfo.SetContactInfo( "https://discord.gg/0wtJ6aAd7XOGI6vI" );
+	g_Module.ScriptInfo.SetMinimumAdminLevel( ADMIN_YES ); //remove this line if it prevents non-admins from using the chatcommands (it shouldn't :hehe:)
 
 	g_Hooks.RegisterHook( Hooks::Player::PlayerSpawn, @Pets::PlayerSpawn );
 	g_Hooks.RegisterHook( Hooks::Player::PlayerKilled, @Pets::PlayerKilled );
@@ -16,7 +17,7 @@ void PluginInit()
 
 	@Pets::g_ChatCommands = ChatCommandSystem::ChatCommandManager();
 
-	Pets::g_ChatCommands.AddCommand( ChatCommandSystem::ChatCommand("pet", @Pets::pet_cmd_handle, false, 1, "(petname/menu/off) <scale, up to 0.9> - summon pet, show menu, or remove pet.") );//ChatCommand( szName, callback, fIsCheat, iMinArgumentsRequired = 0, szHelpInfo = "" )
+	Pets::g_ChatCommands.AddCommand( ChatCommandSystem::ChatCommand("pet", @Pets::pet_cmd_handle, false, 1, "(petname/menu/off) <scale, up to 0.9> - summon pet, show menu, or remove pet.") );
 
 	if( Pets::g_petThink !is null )
 		g_Scheduler.RemoveTimer( Pets::g_petThink );
@@ -66,6 +67,9 @@ void MapInit()
 
 namespace Pets
 {
+	//DON'T USE THIS WHEN ADDING OR REMOVING PETS, ONLY FOR EDITING EXISTING ENTRIES IN pets.txt
+	//Restart the map when adding or removing pets
+	CClientCommand pets_reload( "pets_reload", "Reloads pet-definitions from pets.txt.", @ReloadPetsCMD );
 	ChatCommandSystem::ChatCommandManager@ g_ChatCommands = null;
 
 	dictionary g_petUsers;
@@ -76,7 +80,7 @@ namespace Pets
 	dictionary g_petCrossover;
 	CCVar@ g_cvarHideChat;
 	CCVar@ g_cvarHideInfo;
-	const float m_flThinkRate = 0.1f;
+	const float m_flThinkRate = 0.1;
 	CScheduledFunction@ g_petThink = null;
 	array<float> flTimeToDie(33);
 	array<bool> bRemovePet(33);
@@ -116,7 +120,7 @@ namespace Pets
 		bRemovePet[id] = false;
 
 		if( g_petCrossover.exists(sSteamID) )
-			g_Scheduler.SetTimeout( "playerPostSpawn", 1.5f, id, sSteamID );
+			g_Scheduler.SetTimeout( "playerPostSpawn", 1.5, id, sSteamID );
 
 		return HOOK_CONTINUE;
 	}
@@ -150,7 +154,7 @@ namespace Pets
 
 		const CCommand@ args = pParams.GetArguments();
 		CBasePlayer@ pPlayer = pParams.GetPlayer();
-		float flScale = args.ArgC() >= 3 ? atof(args.Arg(2)) : 0.0f;		
+		float flScale = args.ArgC() >= 3 ? atof(args.Arg(2)) : 0.0;
 
 		if( args.ArgC() >= 2 ) // one arg supplied; off, menu, or petname
 		{
@@ -226,17 +230,17 @@ namespace Pets
 				PetData pData;
 				string sName = "";
 				string sModelPath = "";
-				float flScale = 1.0f;
+				float flScale = 1.0;
 				int iIdleAnim = 0;
-				float flIdleSpeed = 1.0f;
+				float flIdleSpeed = 1.0;
 				int iRunAnim = 0;
-				float flRunSpeed = 1.0f;
+				float flRunSpeed = 1.0;
 				int iDeathAnim = 0;
-				float flDeathLength = 1.0f;
-				float flMinusZStanding = 0.0f;
-				float flMinusZCrouching = 0.0f;
-				float flMaxDistance = 0.0f;
-				float flMinDistance = 0.0f;
+				float flDeathLength = 1.0;
+				float flMinusZStanding = 0.0;
+				float flMinusZCrouching = 0.0;
+				float flMaxDistance = 0.0;
+				float flMinDistance = 0.0;
 				string sBoneControllers = "";
 
 				sName = parsed[0];
@@ -276,7 +280,7 @@ namespace Pets
 		}
 	}
 
-	void setpet( CBasePlayer@ pPlayer, string sPet, bool bSilent, float flScale = 0.09f )
+	void setpet( CBasePlayer@ pPlayer, string sPet, bool bSilent, float flScale = 0.09 )
 	{
 		string sSteamID = g_EngineFuncs.GetPlayerAuthId( pPlayer.edict() );
 
@@ -302,7 +306,7 @@ namespace Pets
 
 		pPet.pev.origin = origin;
 
-		if( flScale > 0.09f )
+		if( flScale > 0.09 )
 		{
 			if( flScale > pData.flScale )
 			{
@@ -316,10 +320,10 @@ namespace Pets
 		pPet.pev.solid = SOLID_NOT;
 		pPet.pev.movetype = MOVETYPE_NOCLIP;
 		//@pPet.pev.owner = pPlayer.edict();
-		pPet.pev.nextthink = 1.0f;
+		pPet.pev.nextthink = 1.0;
 		pPet.pev.sequence = 0;
 		pPet.pev.gaitsequence = 0;
-		pPet.pev.framerate = 1.0f;
+		pPet.pev.framerate = 1.0;
 
 		if( !pData.sBoneControllers.IsEmpty() )
 		{
@@ -340,7 +344,7 @@ namespace Pets
 		{
 			if(g_cvarHideInfo.GetInt() <= 0)
 			{
-				if( flScale > 0.0f and flScale < pData.flScale )
+				if( flScale > 0.0 and flScale < pData.flScale )
 					g_PlayerFuncs.ClientPrintAll( HUD_PRINTTALK, "[PETS] " + string(pPlayer.pev.netname) + " summoned a pet! (name: " + sPet + " - scale: " + pPet.pev.scale + ")\n" );
 				else g_PlayerFuncs.ClientPrintAll( HUD_PRINTTALK, "[PETS] " + string(pPlayer.pev.netname) + " summoned a pet! (name: " + sPet + ")\n" );
 			}
@@ -444,7 +448,7 @@ namespace Pets
 
 						origin2 = pPet.pev.origin;
 
-						origin = get_offset_origin_body( pPlayer, Vector(50.0f, 0.0f, 0.0f) );
+						origin = get_offset_origin_body( pPlayer, Vector(50.0, 0.0, 0.0) );
 
 						if( IsUserCrouching(pPlayer) ) origin.z -= pData.flMinusZCrouching;
 						else origin.z -= pData.flMinusZStanding;
@@ -453,7 +457,7 @@ namespace Pets
 							pPet.pev.origin = origin;
 						else if( (origin - origin2).Length() > pData.flMinDistance )
 						{
-							velocity = get_speed_vector( origin2, origin, 250.0f );
+							velocity = get_speed_vector( origin2, origin, 250.0 );
 							pPet.pev.velocity = velocity;
 
 							if( (pPet.pev.sequence != pData.iRunAnim or pPet.pev.framerate != pData.flRunSpeed) and pPlayer.IsAlive() )
@@ -464,7 +468,7 @@ namespace Pets
 								pPet.pev.framerate = pData.flRunSpeed;
 							}
 						}
-						else if( (origin - origin2).Length() < pData.flMinDistance - 5.0f )
+						else if( (origin - origin2).Length() < pData.flMinDistance - 5.0 )
 						{
 							if( (pPet.pev.sequence != pData.iIdleAnim or pPet.pev.framerate != pData.flIdleSpeed) and pPlayer.IsAlive() )
 							{
@@ -483,7 +487,7 @@ namespace Pets
 						origin.z = origin2.z;
 						entity_set_aim( ePet, origin );
 
-						pPet.pev.nextthink = g_Engine.time + 1.0f;
+						pPet.pev.nextthink = g_Engine.time + 1.0;
 					}
 				}
 			}
@@ -505,7 +509,7 @@ namespace Pets
 				int id = pPlayer.entindex();
 
 				pPet.pev.frame = 1;
-				pPet.pev.animtime = 100.0f;
+				pPet.pev.animtime = 100.0;
 				pPet.pev.sequence = pData.iDeathAnim;
 				pPet.pev.gaitsequence = pData.iDeathAnim;
 
@@ -533,11 +537,11 @@ namespace Pets
 
 		origin = pPlayer.pev.origin;
 
-		origin.x += cos(angles.y * Math.PI / 180.0f) * offset.x;
-		origin.y += sin(angles.y * Math.PI / 180.0f) * offset.x;
+		origin.x += cos(angles.y * Math.PI / 180.0) * offset.x;
+		origin.y += sin(angles.y * Math.PI / 180.0) * offset.x;
 
-		origin.y += cos(angles.y * Math.PI / 180.0f) * offset.y;
-		origin.x += sin(angles.y * Math.PI / 180.0f) * offset.y;
+		origin.y += cos(angles.y * Math.PI / 180.0) * offset.y;
+		origin.x += sin(angles.y * Math.PI / 180.0) * offset.y;
 
 		return origin;
 	}
@@ -581,7 +585,7 @@ namespace Pets
 
 		Vector aim_vector;
 
-		if( v_length > 0.0f )
+		if( v_length > 0.0 )
 		{
 			aim_vector.x = origin.x / v_length;
 			aim_vector.y = origin.y / v_length;
@@ -595,12 +599,21 @@ namespace Pets
 
 		new_angles.x *= -1;
 
-		if( new_angles.y > 180.0f ) new_angles.y -= 360;
-		if( new_angles.y < -180.0f ) new_angles.y += 360;
-		if( new_angles.y == 180.0f or new_angles.y == -180.0f ) new_angles.y = -179.999999f;
+		if( new_angles.y > 180.0 ) new_angles.y -= 360;
+		if( new_angles.y < -180.0 ) new_angles.y += 360;
+		if( new_angles.y == 180.0 or new_angles.y == -180.0 ) new_angles.y = -179.999999;
 
 		pEnt.pev.angles = new_angles;
 		pEnt.pev.fixangle = 1;
+	}
+
+	void ReloadPetsCMD( const CCommand@ args )
+	{
+		CBasePlayer@ pPlayer = g_ConCommandSystem.GetCurrentPlayer();
+		//Check for admin here instead of using SetMinimumAdminLevel ??
+		g_petModels.deleteAll();
+		ReadPets();
+		g_PlayerFuncs.ClientPrint( pPlayer, HUD_PRINTCONSOLE, "[PETS] pets.txt reloaded succesfully?\n" );
 	}
 }
 
@@ -630,5 +643,13 @@ namespace Pets
 *    Date:         December 20 2023
 *    -------------------------
 *    - Converted to normal plugin
+*    -------------------------
+*
+*    Version:     1.3.1
+*    Date:         17 February 2024
+*    -------------------------
+*    - Added .pets_reload command to make adjusting a pet's bone controllers smoother
+*      Dont' use this when adding or removing pets, only for editing existing entries in pets.txt
+*      Restart the map when adding or removing pets
 *    -------------------------
 */
