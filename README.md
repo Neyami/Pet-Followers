@@ -1,4 +1,5 @@
-World of Warcraft-style (ish) minipets in Sven Co-op!
+World of Warcraft-style (ish) minipets in Sven Co-op!  
+Based on AMXX plugin GHW Pet Followers by GHW_Chronic
 
 # Chat commands
 pet menu  
